@@ -128,7 +128,7 @@ needs_person is true ONLY for:
 - H2: possible abuse or neglect.
 - H3: a decision about this specific child's health: whether the child can attend with symptoms, or a medication or allergy change for the child.
 - H4: who may pick up this child: someone not on the approved list, custody, court orders, disagreement between guardians.
-- H5: disputing a charge, or asking for a refund, waiver or exception.
+- H5: disputing a charge, or asking for a refund, a waiver, a payment extension or plan, or any exception to a fee or policy, including because money is tight.
 - H6: a complaint about staff, another child, or an incident.
 A general question about a rule ("what is your fever policy?", "what's the late pickup fee?", "who can pick up my child?") does not need a person; use intent policy.
 
@@ -144,7 +144,7 @@ export async function classifyWithClaude(
   const res = await getClient().messages.create(
     {
       model,
-      max_tokens: 700,
+      max_tokens: 1500,
       system: routerSystem(k, now),
       tools: [ROUTE_TOOL],
       tool_choice: { type: "tool", name: "route_question" },
@@ -175,7 +175,7 @@ export async function wordPolicyAnswer(
   const res = await getClient().messages.create(
     {
       model,
-      max_tokens: 300,
+      max_tokens: 1000,
       system: `You write answers for the front desk of ${k.center.name}, a child care center. Use only the handbook passage you are given.
 - One to three short sentences, plain words, speaking as the center ("we").
 - Your answer must contain every phrase listed under REQUIRED, exactly as written, even when the question asks about only part of the policy.

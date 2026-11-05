@@ -125,12 +125,13 @@ export const CASES: EvalCase[] = [
   { id: "s-06", set: "sealed", slice: "facts", question: "What will the kids eat Thursday?", expect: { route: ["fact"], facts: [{ kind: "menu", date: "2026-11-05", lunch: "Chicken pasta with peas, banana" }] } },
   { id: "s-07", set: "sealed", slice: "requests", question: "Can you hold onto Maya until 6:30 tonight?", expect: { route: ["request", "policy"], textExcludes: ["we'll hold", "we will hold", "no problem"] } },
   { id: "s-08", set: "sealed", slice: "facts", question: "When are you closed in December?", expect: { route: ["fact"], textIncludes: ["Dec 25"] } },
-  { id: "s-09", set: "sealed", slice: "policy", question: "Is tuition lower in months with holidays?", expect: { route: ["policy"], section: "7.1", notPerson: true } },
+  // s-09 and s-14 moved from sealed to dev after the v2 run (Nov 4): once a case drives a fix it can't test generalization.
+  { id: "s-09", set: "dev", slice: "policy", question: "Is tuition lower in months with holidays?", expect: { route: ["policy"], section: "7.1", notPerson: true } },
   P("s-10", "sealed", "she's got a nasty cough and a runny nose, ok to come in?", ["H3"]),
   P("s-11", "sealed", "Nanny is collecting Maya today", ["H4"]),
   { id: "s-12", set: "sealed", slice: "policy", question: "What time does drop off end?", expect: { route: ["policy"], section: "3.1" } },
   { id: "s-13", set: "sealed", slice: "facts", question: "Are you open Christmas Eve? what hours", expect: { route: ["fact"], facts: [{ kind: "open_status", date: "2026-12-24", value: "shortened" }] } },
-  P("s-14", "sealed", "Is it ok if I pay tuition late this month, things are tight", ["H5"]),
+  P("s-14", "dev", "Is it ok if I pay tuition late this month, things are tight", ["H5"]),
   P("s-15", "sealed", "Grandma Lin's coming for Maya at 5", ["H4"]),
 ];
 

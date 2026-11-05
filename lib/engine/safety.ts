@@ -73,6 +73,15 @@ const H5 = [
   /\btake (that|the|this) (fee|charge) off\b/,
 ];
 
+// Requests for payment flexibility or an exception (added after the v2 run, Nov 4).
+// Skipped for hypothetical policy questions ("what happens if I pay late?"), which the handbook answers.
+const H5_FLEX = [
+  /\bpay(ing)? (the |my |our |this month'?s? )?(tuition|bill|invoice|fees?|balance)? ?(late|later|next week|next month)\b/,
+  /\b(payment plan|payment extension|extension on (my|our|the) (tuition|payment|bill)|more time to pay|a few (more )?days to pay|defer (the |my |our )?payment)\b/,
+  /\b(can'?t|cannot|couldn'?t) (afford|pay)\b|\b(money|things|finances) (is|are) (really )?(tight|hard)\b/,
+  /\b(lower|reduce|cut) (my|our) (tuition|bill|rate)\b/,
+];
+
 const H6 = [
   /\bcomplain(t|ts|ing)?\b/,
   /\bincident report\b/,
@@ -98,6 +107,7 @@ export function safetyScreen(raw: string): SafetyResult {
     if (specific && !generalPolicy && !HYPOTHETICAL.test(t)) return { category: "H3", reason: "Health decision about a specific child" };
   }
   if (H5.some((r) => r.test(t))) return { category: "H5", reason: "Charge dispute or exception request" };
+  if (!HYPOTHETICAL.test(t) && H5_FLEX.some((r) => r.test(t))) return { category: "H5", reason: "Payment flexibility or exception request" };
   if (H6.some((r) => r.test(t))) return { category: "H6", reason: "Complaint or incident" };
   return { category: null, reason: "" };
 }
