@@ -29,7 +29,7 @@ import { resolveDate } from "./resolveDate.ts";
 import { classifyWithRules } from "./rules.ts";
 import { commitmentHits, normalize, safetyScreen } from "./safety.ts";
 
-export const ENGINE_VERSION = "v1";
+export const ENGINE_VERSION = "v2";
 
 // ---------- helpers ----------
 
@@ -589,28 +589,44 @@ export async function answerQuestion(body: AskRequestBody): Promise<AskResult> {
         }
         const blocks: Block[] = [];
         let worded = false;
+        let noAnswer = false;
         if (useModel && classifier !== "rules") {
           try {
-            const w = await wordPolicyAnswer(question, s, k, modelId);
+            // Word once; if the only problem is a dropped condition, retry once with the missing phrases named.
+            let w = await wordPolicyAnswer(question, s, k, modelId);
             usage.input += w.usage.input;
             usage.output += w.usage.output;
-            aiText.push(w.text);
-            const problems: string[] = [];
-            const missing = s.required.filter((r) => !hasPhrase(w.text, r));
-            if (missing.length) problems.push(`policy wording dropped required condition: ${missing.join(", ")}`);
-            const hits = commitmentHits(w.text);
-            if (hits.length) problems.push("policy wording used commitment language");
-            if (!numbersOk(w.text, s.text)) problems.push("policy wording added a number not in the handbook");
-            if (!w.text) problems.push("empty policy wording");
-            if (problems.length) {
-              failures.push(...problems);
+            const missing0 = s.required.filter((r) => !hasPhrase(w.text, r));
+            if (w.text && w.text.trim() !== "NO_ANSWER" && missing0.length) {
+              w = await wordPolicyAnswer(question, s, k, modelId, missing0);
+              usage.input += w.usage.input;
+              usage.output += w.usage.output;
+            }
+            if (w.text.trim() === "NO_ANSWER") {
+              noAnswer = true;
             } else {
-              blocks.push({ type: "text", text: w.text });
-              worded = true;
+              aiText.push(w.text);
+              const problems: string[] = [];
+              const missing = s.required.filter((r) => !hasPhrase(w.text, r));
+              if (!w.text) problems.push(`empty policy wording (model returned: ${w.blockTypes.join(", ") || "nothing"})`);
+              else if (missing.length) problems.push(`policy wording dropped required condition: ${missing.join(", ")}`);
+              if (commitmentHits(w.text).length) problems.push("policy wording used commitment language");
+              if (!numbersOk(w.text, s.text)) problems.push("policy wording added a number not in the handbook");
+              if (problems.length) {
+                failures.push(...problems);
+              } else {
+                blocks.push({ type: "text", text: w.text });
+                worded = true;
+              }
             }
           } catch (e) {
             fallback = fallback ?? `Policy wording unavailable (${(e as Error).message.slice(0, 60)}); handbook text shown`;
           }
+        }
+        if (noAnswer) {
+          // The model says the routed section doesn't answer the question: treat it as a gap, not a quote.
+          rendered.push(renderUnknown(now, k, question));
+          break;
         }
         if (!worded) blocks.push({ type: "text", text: `Here's what the handbook says (Handbook ${s.id}, ${s.title}):` });
         blocks.push({ type: "quote", text: s.text, sourceId: `handbook:${s.id}` });
