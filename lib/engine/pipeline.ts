@@ -521,7 +521,7 @@ export async function answerQuestion(body: AskRequestBody): Promise<AskResult> {
       usage.output += r.usage.output;
       classifier = modelId;
     } catch (e) {
-      fallback = `Model unavailable (${(e as Error).message.slice(0, 80)}); rule-based routing used`;
+      fallback = `Model unavailable (${(e as Error).message.slice(0, 240)}); rule-based routing used`;
       cls = classifyWithRules(question, k);
     }
   } else {

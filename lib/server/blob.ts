@@ -6,7 +6,8 @@ import { get, list, put } from "@vercel/blob";
 const access = (process.env.BLOB_ACCESS === "public" ? "public" : "private") as "public" | "private";
 
 export function blobConfigured(): boolean {
-  return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+  // A connected store provides either a read-write token or OIDC credentials (BLOB_STORE_ID).
+  return Boolean(process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_STORE_ID);
 }
 
 export async function putJson(pathname: string, data: unknown): Promise<boolean> {

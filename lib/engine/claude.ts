@@ -145,7 +145,6 @@ export async function classifyWithClaude(
     {
       model,
       max_tokens: 700,
-      temperature: 0,
       system: routerSystem(k, now),
       tools: [ROUTE_TOOL],
       tool_choice: { type: "tool", name: "route_question" },
@@ -176,7 +175,6 @@ export async function wordPolicyAnswer(
     {
       model,
       max_tokens: 300,
-      temperature: 0,
       system: `You write answers for the front desk of ${k.center.name}, a child care center. Use only the handbook passage you are given.
 - One to three short sentences, plain words, speaking as the center ("we").
 - Keep every phrase listed under REQUIRED, exactly as written.
