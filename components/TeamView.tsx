@@ -29,7 +29,14 @@ export default function TeamView() {
   const [progress, setProgress] = useState<CaseResult[]>([]);
   const [error, setError] = useState("");
   const [localRun, setLocalRun] = useState<StoredRun | null>(null);
-  const [clicks, setClicks] = useState<{ sessions: number; counts: Record<string, number>; sessionsWith: Record<string, number> } | null>(null);
+  const [clicks, setClicks] = useState<{
+    sessions: number;
+    counts: Record<string, number>;
+    sessionsWith: Record<string, number>;
+    questions?: number;
+    feedback?: ({ value?: string; reason?: string; traceId?: string } | undefined)[];
+    traces?: { id: string; ts: number; q: string; route: string; model: string; category?: string; latencyMs: number; fallback: boolean; answer: string; session: string }[];
+  } | null>(null);
   const stop = useRef(false);
 
   const load = useCallback(() => {
@@ -37,6 +44,12 @@ export default function TeamView() {
     fetch("/api/evals").then((r) => r.json()).then((d) => setRuns(d.runs ?? [])).catch(() => {});
     fetch("/api/events").then((r) => r.json()).then(setClicks).catch(() => {});
   }, []);
+  const loadQuestions = () => {
+    fetch("/api/events", { headers: { "x-team-code": code } })
+      .then((r) => r.json())
+      .then(setClicks)
+      .catch(() => {});
+  };
   useEffect(load, [load]);
 
   const run = async () => {
@@ -263,6 +276,66 @@ export default function TeamView() {
             </div>
           ) : (
             <p className="small muted">{status?.storage ? "No sessions recorded yet." : "Event storage isn't connected in this deployment, so events stay in each visitor's browser."}</p>
+          )}
+        </section>
+
+        <section className="card stack" aria-label="Parent questions, all visitors">
+          <h2 style={{ fontSize: 22 }}>Parent questions, all visitors</h2>
+          <span className="small muted">
+            The raw material for error analysis: what parents typed (emails and numbers removed), how the desk routed it, and any feedback. {clicks?.questions ?? 0} recorded. Visible to the brightwheel team only.
+          </span>
+          <div className="row" style={{ alignItems: "flex-end" }}>
+            <label className="field">
+              Team code
+              <input className="input" value={code} onChange={(e) => setCode(e.target.value)} type="password" autoComplete="off" />
+            </label>
+            <button type="button" className="btn" onClick={loadQuestions} disabled={!code}>
+              Show questions
+            </button>
+            {clicks?.traces?.length ? (
+              <a
+                className="btn"
+                href={URL.createObjectURL(new Blob([JSON.stringify({ traces: clicks.traces, feedback: clicks.feedback }, null, 2)], { type: "application/json" }))}
+                download="front-desk-questions.json"
+              >
+                Download as JSON
+              </a>
+            ) : null}
+          </div>
+          {clicks?.traces?.length ? (
+            <div className="scroll-x">
+              <table className="t">
+                <thead>
+                  <tr>
+                    <th>When</th>
+                    <th>Question</th>
+                    <th>Route</th>
+                    <th>Answer shown</th>
+                    <th>Feedback</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {clicks.traces.slice(0, 60).map((t) => {
+                    const fb = clicks.feedback?.find((f) => f?.traceId === t.id);
+                    return (
+                      <tr key={t.id}>
+                        <td className="small">{new Date(t.ts).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</td>
+                        <td>{t.q}</td>
+                        <td className="small">
+                          {t.route}
+                          {t.category ? ` (${t.category})` : ""}
+                          {t.fallback ? " · backup rules" : ""}
+                        </td>
+                        <td className="small" style={{ maxWidth: 360 }}>{t.answer.slice(0, 160)}{t.answer.length > 160 ? "…" : ""}</td>
+                        <td className="small">{fb ? (fb.value === "yes" ? "Yes" : `No: ${fb.reason}`) : "-"}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="small muted">{clicks?.questions ? "Enter the team code to see them." : "No questions recorded yet."}</p>
           )}
         </section>
 

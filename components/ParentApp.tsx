@@ -340,6 +340,9 @@ function Thread({ s, now, onBack, onSource, onTalk }: { s: Sandbox; now: CenterN
       </main>
       <footer className="p-footer">
         <AskBar placeholder="Ask another question" />
+        <span className="xs muted" style={{ textAlign: "center" }}>
+          Questions are recorded anonymously to improve this prototype. Please don&apos;t enter real personal information.
+        </span>
       </footer>
     </>
   );

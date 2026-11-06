@@ -4,7 +4,7 @@ import { fmtShort, fmtTime } from "../dates.ts";
 import { safetyScreen } from "../engine/safety.ts";
 import type { ActionKind, AskResult, PersonCategory, TourSlot } from "../types.ts";
 import { demoNow, getSandbox, stampOf, uid, update, type InboxItem, type Sandbox, type ThreadEntry } from "./store.ts";
-import { track } from "./track.ts";
+import { redact, trace, track } from "./track.ts";
 
 export const ACTION_META: Record<ActionKind, { label: string; tag: string; needs: "acknowledge" | "confirm" | "person" | "none" }> = {
   running_late: { label: "Running late", tag: "Running late · acknowledge", needs: "acknowledge" },
@@ -74,7 +74,25 @@ export async function ask(question: string, channel: "text" | "voice" | "suggest
       handoff: { category: "H7", mode: "offer", to: "Front desk staff", dueLabel: "Within 1 business day", dueMinutes: 24 * 60, reason: "Assistant unavailable", summary: question },
     };
   }
-  track("answer_shown", { route: result.route, latencyMs: Date.now() - t0, model: result.classifier, sources: result.sources.length });
+  track("answer_shown", { route: result.route, latencyMs: Date.now() - t0, model: result.classifier, sources: result.sources.length, traceId: id });
+  trace({
+    id,
+    ts: Date.now(),
+    q: redact(question),
+    channel,
+    route: result.route,
+    intents: result.intents,
+    model: result.classifier,
+    category: result.handoff?.category,
+    latencyMs: Date.now() - t0,
+    gap: result.gap?.key,
+    fallback: Boolean(result.fallback),
+    answer: redact(
+      result.blocks
+        .map((b) => (b.type === "text" ? `${b.strong ? b.strong + " " : ""}${b.text}` : b.type === "list" ? b.items.join("; ") : b.type === "quote" ? `"${b.text}"` : ""))
+        .join(" "),
+    ),
+  });
 
   let entry: ThreadEntry = { id, stamp: stampOf(now), kind: "qa", question, channel, result };
   update((st) => {
@@ -244,7 +262,7 @@ export function giveFeedback(threadId: string, value: "yes" | "no", reason?: str
     const e = st.thread.find((x) => x.id === threadId);
     if (e) e.feedback = { value, reason };
   });
-  track("feedback_given", { value, reason: reason ?? "" });
+  track("feedback_given", { value, reason: reason ?? "", traceId: threadId });
 }
 
 // ---------- operator actions ----------

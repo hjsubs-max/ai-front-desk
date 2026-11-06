@@ -29,7 +29,7 @@ import { resolveDate } from "./resolveDate.ts";
 import { classifyWithRules } from "./rules.ts";
 import { commitmentHits, normalize, safetyScreen } from "./safety.ts";
 
-export const ENGINE_VERSION = "v2";
+export const ENGINE_VERSION = "v3";
 
 // ---------- helpers ----------
 

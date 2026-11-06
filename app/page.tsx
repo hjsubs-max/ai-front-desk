@@ -41,7 +41,7 @@ export default function Landing() {
             <li>Switch the demo clock in the black bar to Pickup to see the afternoon buttons.</li>
             <li>In Source of truth, set a topic to &ldquo;AI drafts, staff send&rdquo; and ask about it.</li>
           </ul>
-          <span className="xs muted">Everything you do stays in this browser; Reset demo in the black bar starts over. Anonymous usage events are recorded to measure the prototype.</span>
+          <span className="xs muted">Your edits stay in this browser; Reset demo in the black bar starts over. Anonymous usage events and the questions you type (with emails and phone numbers removed) are recorded to improve the prototype, so please don't enter real personal information.</span>
         </section>
       </main>
     </div>
