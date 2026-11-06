@@ -6,7 +6,7 @@ import { ACTION_META, ask, bookTour, cancelRequest, createAction, giveFeedback, 
 import { demoNow, stampTime, useSandbox, type InboxItem, type Sandbox, type ThreadEntry } from "@/lib/client/store";
 import { setView, track } from "@/lib/client/track";
 import { addDays, fmtLong, fmtShort, fmtStamp, fmtTime, isWeekend, toMinutes } from "@/lib/dates";
-import { isOpenNow, nextOpenDay, openStatus } from "@/lib/engine/pipeline";
+import { isOpenNow, nextOpenDay, openStatus, reopenSentence } from "@/lib/engine/pipeline";
 import type { ActionKind, Block, CenterNow, Knowledge, TourSlot } from "@/lib/types";
 import Banner from "./Banner";
 import { ACTION_ICONS, ArrowUp, Back, Calendar, Doc, Mic, Person, Sparkle } from "./Icons";
@@ -123,6 +123,7 @@ function Home({ s, now, onAsked, onAction, onTalk, onOpenThread }: { s: Sandbox;
               );
             })}
           </div>
+          <p className="xs muted">The assistant answers from Sunnyside&apos;s calendar, menu, tuition and handbook. Anything about your child&apos;s health, who picks up, or a charge goes to staff.</p>
         </section>
         {active.length > 0 && (
           <section aria-label="Your requests" className="stack">
@@ -161,7 +162,7 @@ function Home({ s, now, onAsked, onAction, onTalk, onOpenThread }: { s: Sandbox;
             </button>
           ))}
         </div>
-        <AskBar placeholder="Ask anything about Sunnyside" onSubmit={onAsked} />
+        <AskBar placeholder="Ask about Sunnyside" onSubmit={onAsked} />
       </footer>
     </>
   );
@@ -196,7 +197,7 @@ function TodayCard({ k, now, win }: { k: Knowledge; now: CenterNow; win: "dropof
       </div>
       {closedToday ? (
         <p className="small">
-          {entry ? `Closed for ${entry.name}. ` : "Closed on weekends. "}We reopen {fmtLong(nextOpenDay(now.date, k))} at {fmtTime(k.hours.open)}.
+          {entry ? `Closed for ${entry.name}. ` : "Closed on weekends. "}{reopenSentence(now.date, k)}
         </p>
       ) : (
         <div className="today-grid">
@@ -409,7 +410,7 @@ function Entry({ e, s, now, onSource, onTalk }: { e: ThreadEntry; s: Sandbox; no
               <div className="stack" style={{ gap: 4 }}>
                 <span style={{ fontWeight: 700 }}>Only our staff can decide about {child} today.</span>
                 <span className="small">
-                  {item ? `Sent to ${r.handoff.to}.` : `Send her symptoms and ${s.knowledge.center.director}, the director, will reply.`} Reply: {r.handoff.dueLabel.toLowerCase()}.
+                  {item ? `Sent to ${r.handoff.to}.` : `Send ${child}'s symptoms and ${s.knowledge.center.director}, the director, will reply.`} Reply: {r.handoff.dueLabel.toLowerCase()}.
                 </span>
               </div>
             </div>
@@ -523,7 +524,6 @@ function AnswerCard({ e, s, onSource, onTalk, hideFeedback }: { e: ThreadEntry; 
           ))}
         </div>
       )}
-      {r.fallback && <span className="xs muted">Answered with the backup rules: {r.fallback}.</span>}
       {!hideFeedback && r.route !== "out_of_scope" && r.route !== "request" && (
         <div className="stack" style={{ gap: 8, borderTop: "1px solid var(--line)", paddingTop: 10 }}>
           {e.feedback ? (

@@ -55,10 +55,25 @@ export function isClosedDay(date: string, k: Knowledge): boolean {
   return e?.status === "closed";
 }
 
+/** What to say about reopening after a closed day: never assert a day the calendar hasn't decided. */
+export function reopenSentence(after: string, k: Knowledge): string {
+  let d = addDays(after, 1);
+  for (let i = 0; i < 30; i++) {
+    const st = openStatus(d, k);
+    if (st.value === "unknown") {
+      const sure = nextOpenDay(d, k);
+      return `The calendar doesn't say yet whether we're open on ${fmtLong(d)}; we're open again ${fmtLong(sure)} at ${fmtTime(entryFor(sure, k)?.open ?? k.hours.open)}.`;
+    }
+    if (st.value === "open" || st.value === "shortened") return `We reopen ${fmtLong(d)} at ${fmtTime(entryFor(d, k)?.open ?? k.hours.open)}.`;
+    d = addDays(d, 1);
+  }
+  return "";
+}
+
 export function nextOpenDay(after: string, k: Knowledge): string {
   let d = addDays(after, 1);
   for (let i = 0; i < 30; i++) {
-    if (!isClosedDay(d, k)) return d;
+    if (!isClosedDay(d, k) && openStatus(d, k).value !== "unknown") return d;
     d = addDays(d, 1);
   }
   return d;
@@ -158,13 +173,12 @@ function renderOpenOnDate(part: Part, now: CenterNow, k: Knowledge): Rendered {
   const fact: FactAssertion = { kind: "open_status", date: d, value: st.value, name: st.entry?.name };
   const isToday = d === now.date;
   if (st.value === "closed") {
-    const back = nextOpenDay(d, k);
     return {
       route: "fact",
       topic: "hours",
       blocks: [
         { type: "text", text: `We're closed on ${label} for ${st.entry!.name}.`, strong: "No." },
-        { type: "text", text: `We reopen ${fmtLong(back)} at ${fmtTime(entryFor(back, k)?.open ?? k.hours.open)}.` },
+        { type: "text", text: reopenSentence(d, k) },
       ],
       facts: [fact],
       sources,
@@ -645,7 +659,7 @@ export async function answerQuestion(body: AskRequestBody): Promise<AskResult> {
       case "greeting":
         rendered.push({
           route: "out_of_scope",
-          blocks: [{ type: "text", text: `Hi! Ask me anything about ${k.center.name}, or use the buttons to let the center know something.` }],
+          blocks: [{ type: "text", text: `Hi! Ask me about ${k.center.name}'s hours, closures, meals, tuition or policies, or use the buttons to let the center know something.` }],
           facts: [],
           sources: [],
         });

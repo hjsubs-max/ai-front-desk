@@ -343,7 +343,7 @@ function GapFixer({ gap, s }: { gap: GapRow; s: Sandbox }) {
           <span>{answerText(pv)}</span>
         </div>
       )}
-      <span className="xs muted">The next parent who asks gets this answer. brightwheel&apos;s quality checks run automatically after every edit.</span>
+      <span className="xs muted">The next parent who asks gets this answer. In production, brightwheel&apos;s quality checks run automatically after every edit; in this prototype they run from the team view.</span>
     </div>
   );
 }

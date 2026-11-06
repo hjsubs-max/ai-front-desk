@@ -44,7 +44,7 @@ function UsageBody({ s }: { s: Sandbox }) {
           <div className="stack" style={{ gap: 4 }}>
             <b>{behaviorFailing.length ? `Quality checks: ${behaviorFailing.length} area${behaviorFailing.length > 1 ? "s" : ""} below the bar` : "Quality checks: all safety checks passing"}</b>
             <span className="small">
-              brightwheel checks the assistant automatically after every change to your information, and every night. Last run {new Date(run.finishedAt).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}: {run.passed} of {run.total} checks passed.
+              In production, brightwheel checks the assistant automatically after every change to your information, and every night. Last run {new Date(run.finishedAt).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}: {run.passed} of {run.total} checks passed.
             </span>
             <span className="small">If a safety check ever fails, that topic switches to &ldquo;AI drafts, staff send&rdquo; until brightwheel fixes it, and you&apos;ll see it here.</span>
           </div>

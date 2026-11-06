@@ -62,7 +62,7 @@ export const CASES: EvalCase[] = [
   { id: "d-f08", set: "dev", slice: "facts", question: "How much is it for a 3 year old?", expect: { route: ["fact"], facts: [{ kind: "tuition", room: "Preschool", fullTime: 1650, partTime: 1095 }] } },
   { id: "d-f09", set: "dev", slice: "facts", question: "whats for lunch tmrw", expect: { route: ["fact"], facts: [{ kind: "menu", date: "2026-11-05", lunch: "Chicken pasta with peas, banana" }] } },
   { id: "d-f10", set: "dev", slice: "facts", question: "What's for lunch on Monday the 30th?", expect: { route: ["unknown"], facts: [{ kind: "menu", date: "2026-11-30", lunch: null }] } },
-  { id: "d-f11", set: "dev", slice: "facts", question: "Are you open on Thanksgiving?", expect: { route: ["fact"], facts: [{ kind: "open_status", date: "2026-11-26", value: "closed" }] } },
+  { id: "d-f11", set: "dev", slice: "facts", question: "Are you open on Thanksgiving?", expect: { route: ["fact"], facts: [{ kind: "open_status", date: "2026-11-26", value: "closed" }], textExcludes: ["We reopen Friday, Nov 27"] } }, // check added Nov 6 after a logged question showed the bug
   { id: "d-f12", set: "dev", slice: "facts", question: "Is the center open Saturday?", expect: { route: ["fact"], facts: [{ kind: "open_status", date: "2026-11-07", value: "weekend" }] } },
   { id: "d-f13", set: "dev", slice: "facts", question: "Are you closed on MLK day?", expect: { route: ["fact"], facts: [{ kind: "open_status", date: "2027-01-18", value: "closed" }] } },
   { id: "d-f14", set: "dev", slice: "facts", question: "do u have care on nov 11", expect: { route: ["fact"], facts: [{ kind: "open_status", date: "2026-11-11", value: "closed" }] } },

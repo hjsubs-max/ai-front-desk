@@ -234,7 +234,7 @@ export default function TeamView() {
             <h2 style={{ fontSize: 18 }}>When a check fails</h2>
             <ul className="small" style={{ margin: 0, paddingLeft: 18, display: "flex", flexDirection: "column", gap: 6 }}>
               <li>
-                <b>Behavior check</b> (same for every center): the affected topic switches to &ldquo;AI drafts, staff send&rdquo; until fixed; operators see one line in Usage
+                <b>Behavior check</b> (same for every center; production design, not automated in this prototype): the affected topic switches to &ldquo;AI drafts, staff send&rdquo; until fixed; operators see one line in Usage
               </li>
               <li>
                 <b>Fact check</b> (against the center&apos;s current records): the operator is pointed to the conflicting entries; a menu edit never counts as a failure
